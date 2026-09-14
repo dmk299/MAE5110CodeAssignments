@@ -70,7 +70,7 @@ print("=" * 60)
 print("SWEEP 2: Ramp angle")
 print("=" * 60)
 
-ramp_angles = np.linspace(-0.7, -0.1, 13)
+ramp_angles = np.linspace(0.1, 1.0, 15)  # sweep from shallow to steep, all positive
 
 percent_converged_ramp = []
 floquet_ramp = []
@@ -80,7 +80,9 @@ for angle in ramp_angles:
     p = dict(base_params)
     p["slope_angle"] = angle
 
-    omega_fixed, floquet = model.compute_fixed_point_and_floquet(p, timestep)
+    omega_fixed, floquet = model.compute_fixed_point_and_floquet(
+    p, timestep, omega_search_range=(0.1, 30.0), n_search_points=100
+    )
     if omega_fixed is None:
         print(f"slope={angle:.3f}: no fixed point found, skipping")
         percent_converged_ramp.append(np.nan)
@@ -99,45 +101,20 @@ for angle in ramp_angles:
 
 
 
-p = dict(base_params)
-p["number_of_spokes"] = 6
-p["slope_angle"] = -0.1   # shallow, per your target plot
+p = dict(base_params)  # don't override slope_angle -- use whatever Sweep 1 uses
+initial_theta = -np.pi / p["number_of_spokes"] + p["slope_angle"]
 
-upper = np.pi / p["number_of_spokes"] + p["slope_angle"]
-lower = -np.pi / p["number_of_spokes"] + p["slope_angle"]
+print(f"Testing slope_angle = {p['slope_angle']}")
+for w0 in np.linspace(0.1, 10.0, 40):
+    w1 = model.one_step_return(w0, initial_theta, p, timestep)
+    if w1 is None:
+        print(f"{w0:8.2f} | fell back")
+    else:
+        print(f"{w0:8.2f} | P={w1:.4f} | residual={w1 - w0:.4f}")
 
-test_angles = np.array([
-    lower + 0.05,
-    lower + (upper - lower) * 0.25,
-    p["slope_angle"],
-    lower + (upper - lower) * 0.75,
-    upper - 0.05,
-])
 
-test_velocities = np.linspace(-0.3, 0.3, 9)
 
-print(f"Wedge bounds: lower={lower:.3f}, upper={upper:.3f}")
-print(f"{'angle':>8} | {'v0':>6} | {'final_omega':>12} | result")
-print("-" * 50)
 
-results_grid = []
-for angle in test_angles:
-    row = []
-    for v0 in test_velocities:
-        initial_state = np.array([angle, v0])
-        state_traj, final_step = model.simulate_to_attractor_fast(
-            initial_state, p, timestep, sim_time,
-            warmup_time=15.0, compare_time=3.0, energy_tol=0.0001
-        )
-        final_omega = state_traj[1, final_step]
-        converged = not (-0.05 <= final_omega <= 0.05)
-        row.append(converged)
-        print(f"{angle:8.3f} | {v0:6.2f} | {final_omega:12.4f} | {'ROLLING' if converged else 'RESTED'}")
-    results_grid.append(row)
-    print()
-
-results_grid = np.array(results_grid)
-print(f"Total tested: {results_grid.size}, ROLLING: {results_grid.sum()}, RESTED: {(~results_grid).sum()}")
 
 model.plot_sweep_with_floquet(
     spoke_counts, percent_converged_spokes, floquet_spokes,

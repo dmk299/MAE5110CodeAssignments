@@ -72,28 +72,29 @@ def simulate_to_attractor(initial_state, params, timestep, sim_time):
 def simulate_until_n_crossings(initial_omega, initial_theta, params, timestep,
                                  n_crossings=2, max_steps=100000):
     """
-    Simulate the rimless wheel starting from a given angle/angular velocity,
-    and return the list of angular velocities recorded at each contact
-    (Poincare section) event, stopping once n_crossings have been recorded.
+    Simulate the rimless wheel and return the list of angular velocities
+    recorded at genuine forward-step contact events (crossing the upper
+    threshold), ignoring backward falls through the lower threshold.
     """
     state = np.array([initial_theta, initial_omega])
     omega_crossings = []
     t = 0.0
 
+    upper = np.pi / params["number_of_spokes"] + params["slope_angle"]
+    lower = -np.pi / params["number_of_spokes"] + params["slope_angle"]
+
     for _ in range(max_steps):
         new_state = state + timestep * dynamics(t, state, params)
 
-        if state[0] > np.pi / params["number_of_spokes"] + params["slope_angle"]:
-            new_state[0] = (-np.pi / params["number_of_spokes"] + params["slope_angle"]
-                             + timestep * dynamics(t, state, params)[0])
-            new_state[1] = state[1] * np.cos(2 * (np.pi / params["number_of_spokes"]))
+        if state[0] > upper:
+            # genuine forward step
+            new_state[0] = lower + timestep * dynamics(t, state, params)[0]
+            new_state[1] = state[1] * np.cos(2 * np.pi / params["number_of_spokes"])
             omega_crossings.append(new_state[1])
 
-        elif state[0] < -np.pi / params["number_of_spokes"] + params["slope_angle"]:
-            new_state[0] = (np.pi / params["number_of_spokes"] + params["slope_angle"]
-                             + timestep * dynamics(t, state, params)[0])
-            new_state[1] = state[1] * np.cos(2 * (np.pi / params["number_of_spokes"]))
-            omega_crossings.append(new_state[1])
+        elif state[0] < lower:
+            # wheel fell backward -- not a valid forward step, stop here
+            return None
 
         state = new_state
         t += timestep
@@ -105,10 +106,8 @@ def simulate_until_n_crossings(initial_omega, initial_theta, params, timestep,
 
 
 def one_step_return(omega0, initial_theta, params, timestep):
-    """Given omega_n at a crossing, return omega_{n+1} at the next crossing."""
-    crossings = simulate_until_n_crossings(omega0, initial_theta, params, timestep,
-                                             n_crossings=1)
-    if len(crossings) < 1:
+    crossings = simulate_until_n_crossings(omega0, initial_theta, params, timestep, n_crossings=1)
+    if crossings is None or len(crossings) < 1:
         return None
     return crossings[0]
 
