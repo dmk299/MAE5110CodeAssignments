@@ -1,7 +1,11 @@
 import numpy as np
+import matplotlib
+matplotlib.use('qtagg')
 import matplotlib.pyplot as plt
 
-from models import pendulum as model
+from models import bouncing_ball as model
+from integrators import explicit_euler as integrator
+
 
 # Basic simulation of the pendulum
 
@@ -10,9 +14,9 @@ params = {
     "length": 1,  # rod length (m)
     "mass": 0.2,  # point mass at end of rod (kg)
     "damping_coeff": 0.0,  # damping coefficient (kg*m^2/s)
+    "stiffness": 100,  # stiffness of ball (kg/s^2)
 }
-
-
+ 
 # some set-up
 initial_state = np.array([np.pi / 4, 0.0])
 
@@ -24,17 +28,83 @@ time_traj = np.arange(n_timesteps) * timestep
 state_traj = np.zeros((2, n_timesteps))
 state_traj[:, 0] = initial_state
 
-# simulation loop
-for step, t in enumerate(time_traj[:-1]):
-    state_traj[:, step + 1] = state_traj[:, step] + timestep * model.dynamics(
-        t, state_traj[:, step], params
-    )
+#Sweep Loop
+
+#Explicit Euler and rk4 sweep
+'''
+potential_energy, kinetic_energy = model.calculate_energy(state_traj, params)
+total_energy = potential_energy + kinetic_energy
+
+while total_energy[-1] * 0.99 <= total_energy[1] <= total_energy[-1] * 1.01:
+
+    time_traj, state_traj = integrator.integrate(model.dynamics, timestep, sim_time, initial_state, params)
+
+    potential_energy, kinetic_energy = model.calculate_energy(state_traj, params)
+    total_energy = potential_energy + kinetic_energy
+    timestep = timestep + 1e-5
+
+print("Final timestep: ", timestep)
+print("Final total energy: ", total_energy[-1])
+print("Initial Total energy: ", total_energy[1])
+'''
+#Regular sweep
+
+# potential_energy, kinetic_energy = model.calculate_energy(state_traj, params)
+# total_energy = potential_energy + kinetic_energy
+
+# while total_energy[1] * 0.99 <= total_energy[-1] <= total_energy[1] * 1.01:
+
+#     n_timesteps = int(sim_time / timestep) + 1
+#     time_traj = np.arange(n_timesteps) * timestep
+#     state_traj = np.zeros((2, n_timesteps))
+#     state_traj[:, 0] = initial_state
+
+#     # simulation loop
+#     for step, t in enumerate(time_traj[:-1]):
+#         state_traj[:, step + 1] = state_traj[:, step] + timestep * model.dynamics(
+#             t, state_traj[:, step], params
+#         )
+
+    # sanity check the energies: since there is no actuation, and no damping, total energy should stay
+    # constant. If we turn on the damping coefficient, it should slowly bleed out energy until it comes to
+    # a stand-still.
+
+#    potential_energy, kinetic_energy = model.calculate_energy(state_traj, params)
+ #   total_energy = potential_energy + kinetic_energy
+ #   timestep = timestep + 1e-5
+    
+
+# print("Final timestep: ", timestep)
+
+# #Regular run through
+# #explicit euler and rk4 code
+# time_traj, state_traj = integrator.integrate(model.dynamics, timestep, sim_time, initial_state, params)
+
+# #regluar code
+# n_timesteps = int(sim_time / timestep) + 1
+# time_traj = np.arange(n_timesteps) * timestep
+# state_traj = np.zeros((2, n_timesteps))
+# state_traj[:, 0] = initial_state
+# print("initial state: ", state_traj[:, 0])
+
+# # simulation loop
+# for step, t in enumerate(time_traj[:-1]):
+#     state_traj[:, step + 1] = state_traj[:, step] + timestep * model.dynamics(
+#         t, state_traj[:, step], params
+#     )
 
 # sanity check the energies: since there is no actuation, and no damping, total energy should stay
 # constant. If we turn on the damping coefficient, it should slowly bleed out energy until it comes to
 # a stand-still.
 
-potential_energy, kinetic_energy = model.calculate_energy(state_traj, params)
+#kinetic_energy, potential_energy = model.calculate_energy(state_traj, params)
+
+
+#Bouncing Ball code
+
+time_traj, state_traj = integrator.integrate(model.dynamics, timestep, sim_time, initial_state, params)
+
+kinetic_energy, potential_energy = model.calculate_energy(state_traj, params)
 
 plt.figure()
 plt.plot(time_traj, potential_energy, label="Potential energy")
@@ -48,3 +118,13 @@ plt.tight_layout()
 plt.show()
 
 # TODO: make a phase portrait plot
+'''
+plt.figure()
+plt.plot(state_traj[1], state_traj[0], label="Phase portrait")
+plt.xlabel("Velocity (m/s)")
+plt.ylabel("Height (m)")
+plt.title("Pendulum phase portrait")
+plt.legend()
+plt.tight_layout()
+plt.show()
+'''
