@@ -52,7 +52,7 @@ def event_dynamics(state, params):
     angular_velocity = state[1]
 
     new_angle = gamma - alpha
-    new_angular_velocity = -np.cos(2 * alpha) * angular_velocity
+    new_angular_velocity = np.cos(2 * alpha) * angular_velocity
     return np.array([new_angle, new_angular_velocity])
 
 def calculate_energy(state, params):
