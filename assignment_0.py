@@ -15,6 +15,7 @@ params = {
     "mass": 0.2,  # point mass at end of rod (kg)
     "damping_coeff": 0.0,  # damping coefficient (kg*m^2/s)
     "stiffness": 100,  # stiffness of ball (kg/s^2)
+    "torque": 0.0,  # torque (Nm)
 }
  
 # some set-up
