@@ -1,7 +1,21 @@
-from pyexpat import model
-
 import numpy as np
 import matplotlib.pyplot as plt
+
+
+def generate_params():
+    params = {
+        "gravity": 9.81,  # m/s^2
+        "length": 1.0,  # spoke length (m)
+        "mass": 0.2,  # point mass at center of wheel (kg)
+        "number_of_spokes": 6,
+        "slope_angle": np.radians(30),  # rad
+    }
+    return params
+
+
+def generate_initial_condition():
+    return np.array([0.2, 0.0])
+
 
 def dynamics(t, state, params):
     gravity = params["gravity"]

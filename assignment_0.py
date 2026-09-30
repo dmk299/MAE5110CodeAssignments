@@ -4,7 +4,7 @@ matplotlib.use('qtagg')
 import matplotlib.pyplot as plt
 
 from models import bouncing_ball as model
-from integrators import explicit_euler as integrator
+from integrators.explicit_euler import integrate
 
 
 # Basic simulation of the pendulum
@@ -38,7 +38,7 @@ total_energy = potential_energy + kinetic_energy
 
 while total_energy[-1] * 0.99 <= total_energy[1] <= total_energy[-1] * 1.01:
 
-    time_traj, state_traj = integrator.integrate(model.dynamics, timestep, sim_time, initial_state, params)
+    time_traj, state_traj = integrate(model.dynamics, timestep, sim_time, initial_state, params)
 
     potential_energy, kinetic_energy = model.calculate_energy(state_traj, params)
     total_energy = potential_energy + kinetic_energy
@@ -79,7 +79,7 @@ print("Initial Total energy: ", total_energy[1])
 
 # #Regular run through
 # #explicit euler and rk4 code
-# time_traj, state_traj = integrator.integrate(model.dynamics, timestep, sim_time, initial_state, params)
+# time_traj, state_traj = integrate(model.dynamics, timestep, sim_time, initial_state, params)
 
 # #regluar code
 # n_timesteps = int(sim_time / timestep) + 1
@@ -103,7 +103,7 @@ print("Initial Total energy: ", total_energy[1])
 
 #Bouncing Ball code
 
-time_traj, state_traj = integrator.integrate(model.dynamics, timestep, sim_time, initial_state, params)
+time_traj, state_traj = integrate(model.dynamics, timestep, sim_time, initial_state, params)
 
 kinetic_energy, potential_energy = model.calculate_energy(state_traj, params)
 
