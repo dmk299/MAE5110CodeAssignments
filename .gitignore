@@ -10,3 +10,8 @@ assignments_tex/
 # Assignment 2 figures, numerical tables, and compiled report are reproducible.
 output/
 tmp/pdfs/
+
+*.png
+*.pdf
+output/
+assignment_2_graphs/
