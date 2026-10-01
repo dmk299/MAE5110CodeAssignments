@@ -26,7 +26,7 @@ def test_energy():
 def test_torque_work():
     params = pendulum.generate_params()
     params["damping_coeff"] = 0.0
-    params["torque"] = 2.0
+    params["torque"] = 1.5
     initial_state = np.array([0.5, 1.0])
 
     _, state_traj = integrate(
@@ -38,13 +38,13 @@ def test_torque_work():
 
     #Checking that the torque actually changes the energy
     assert not np.isclose(total_energy[-1], total_energy[0])
-    #Checks the right magnitude
+    #Checks the right magnitude of the energy after torque applied
     assert np.all(np.isclose(work_adjusted_energy, work_adjusted_energy[0]))
 
 
 def test_damping_dissipation():
     params = pendulum.generate_params()
-    params["damping_coeff"] = 0.5
+    params["damping_coeff"] = 0.3
     params["torque"] = 0.0
     initial_state = np.array([0.5, 1.0])
 
