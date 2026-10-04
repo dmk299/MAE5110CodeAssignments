@@ -8,7 +8,7 @@
 # This example discretizes the pendulum's state space (angle and angular velocity)
 # into a grid and builds a transition matrix that records where each grid point
 # lands under each allowed torque. Value iteration then finds a torque policy that
-# maximizes the discounted reward for reaching the upright position. Finally, the
+# optimizes the discounted reward for reaching the upright position. Finally, the
 # policy is applied to the continuous pendulum, starting from hanging down at rest,
 # and the result is plotted and animated.
 
