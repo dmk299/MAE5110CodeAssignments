@@ -20,6 +20,10 @@ def generate_params():
     return params
 
 
+def generate_initial_condition():
+    return np.array([0.0, 3.0])
+
+
 def dynamics(t, state, params):
     # TODO: implement the state derivative.
     gravity = params["gravity"]

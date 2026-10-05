@@ -4,7 +4,6 @@ matplotlib.use('qtagg')
 import matplotlib.pyplot as plt
 
 from models import rimless_wheel as model
-from integrators import explicit_euler as integrator
 
 # Basic Simulation of rimless wheel
 
